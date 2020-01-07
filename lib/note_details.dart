@@ -164,7 +164,7 @@ class NoteDetailState extends State<NoteDetail>{
 
   void _save() async {
 
-    Navigator.pop(context);
+    Navigator.pop(context, true);
     note.date = DateFormat.yMMMd().format(DateTime.now());
     int result;
     if(note.id != null){   // update operation
@@ -191,7 +191,7 @@ class NoteDetailState extends State<NoteDetail>{
 
   void _delete() async {
 
-    Navigator.pop(context);
+    Navigator.pop(context, true);
 
     if (note.id == null){
       _showAlertDialog('Status', 'No Note was Deleted');
