@@ -27,7 +27,7 @@ class NoteDetailState extends State<NoteDetail>{
   Note note;
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-
+  DatabaseHelper helper = DatabaseHelper();
   NoteDetailState(this.note, this.appBarTitle);
 
   @override
@@ -105,7 +105,11 @@ class NoteDetailState extends State<NoteDetail>{
                     child: RaisedButton(
                       color: Theme.of(context).primaryColorDark,
                       textColor: Theme.of(context).primaryColorLight,
-                      child: Text("Save", textScaleFactor: 1.5,), onPressed: () {},
+                      child: Text("Save", textScaleFactor: 1.5,), onPressed: () {
+                        setState(() {
+                          _save();
+                        });
+                    },
                     ),
                   ),
 
@@ -114,7 +118,11 @@ class NoteDetailState extends State<NoteDetail>{
                     child: RaisedButton(
                       color: Theme.of(context).primaryColorDark,
                       textColor: Theme.of(context).primaryColorLight,
-                      child: Text("Delete", textScaleFactor: 1.5,), onPressed: () {},
+                      child: Text("Delete", textScaleFactor: 1.5,), onPressed: () {
+                        setState(() {
+                          _delete();
+                        });
+                    },
                     ),
                   )
                 ],
@@ -154,8 +162,51 @@ class NoteDetailState extends State<NoteDetail>{
     note.description = descriptionController.text;
   }
 
+  void _save() async {
 
+    Navigator.pop(context);
+    note.date = DateFormat.yMMMd().format(DateTime.now());
+    int result;
+    if(note.id != null){   // update operation
+      result = await helper.updateNote(note);
+    }
+    else{   // insert operation
+      result = await helper.insertNote(note);
+    }
+    if(result != 0){// Success
+      _showAlertDialog('Status', 'Note Saved Successfully');
+    }
+    else{
+      _showAlertDialog('Status', 'Problem Saving Note');
+    }
+  }
 
+  void _showAlertDialog(String title, String message){
+    AlertDialog alertDialog = AlertDialog(
+      title: Text(title),
+      content: Text(message),
+    );
+    showDialog(context: context, builder: (_) => alertDialog);
+  }
+
+  void _delete() async {
+
+    Navigator.pop(context);
+
+    if (note.id == null){
+      _showAlertDialog('Status', 'No Note was Deleted');
+      return;
+    }
+
+    int result = await helper.deleteNote(note.id);
+    if(result != 0){
+      _showAlertDialog('Status', 'Note Deleted Successfully');
+    }
+    else{
+      _showAlertDialog('Status', 'Error Occured while Deleting Note');
+    }
+
+  }
 }
 
 
