@@ -16,7 +16,7 @@ class NoteListState extends State<NoteList> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   List<Note> noteList;
 
-  int count = 10;
+  int count = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +34,7 @@ class NoteListState extends State<NoteList> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           debugPrint("FAB clicked");
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return NoteDetail(Note('', '', 2) ,"Add Note");
-          }));
+          navigateToDetail(Note('', '', 2) ,"Add Note");
         },
         tooltip: "Add note",
         child: Icon(Icons.add),
@@ -84,9 +82,7 @@ class NoteListState extends State<NoteList> {
   //returns priority color
   Color getPriorityColor(int priority){
     switch (priority){
-      case 1:
-        return Colors.red;
-        break;
+      case 1: return Colors.red; break;
       case 2: return Colors.yellow; break;
       case 3: return Colors.green; break;
 
@@ -107,14 +103,22 @@ class NoteListState extends State<NoteList> {
   void _delete(BuildContext context, Note note) async {
     int result = await databaseHelper.deleteNote(note.id);
     if(result != 0) {
-      _showSnackBar(context, "Note Deleted Successfully");
+      _showSnackBar(context, "Note Deleted Successfully", note);
       //TODO update the list view
       updateListView();
     }
 
   }
-  void _showSnackBar(BuildContext context, String message){
-    final snackbar = SnackBar(content: Text(message), );
+  void _showSnackBar(BuildContext context, String message, Note note){
+    final snackbar = SnackBar(content: Text(message),
+    action: SnackBarAction(
+      label: 'Undo',
+      onPressed: (){
+        databaseHelper.insertNote(note);
+        Scaffold.of(context).showSnackBar(SnackBar(content: Text("Note recovered"),));
+        updateListView();
+      },
+    ),);
     Scaffold.of(context).showSnackBar(snackbar);
   }
 
@@ -124,7 +128,7 @@ class NoteListState extends State<NoteList> {
       return NoteDetail(note, appBarTitle);
     }));
 
-    if(result == true){
+    if(result){
       updateListView();
     }
   }

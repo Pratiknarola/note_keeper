@@ -1,5 +1,3 @@
-import 'dart:html';
-
 class Note{
   int _id;
   String _title;
@@ -46,7 +44,7 @@ class Note{
   Map<String, dynamic> toMap(){
     var map = Map<String, dynamic>();
 
-    if(id == null){
+    if(id != null){
       map['id'] = _id;
     }
 
